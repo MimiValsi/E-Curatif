@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+        "e-curatif/internal/data"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -42,6 +44,10 @@ type application struct {
         // Log used only for terminal debug. JSON log will be made later.
         infoLog *log.Logger
         errorLog *log.Logger
+
+        // Connexion to data structs.
+        source *data.Source
+        info *data.Info
 }
 
 // App version will be with github
@@ -66,8 +72,8 @@ func main() {
         flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 20, "PostgreSQL max open connections")
         flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max open connections")
 
-        // errorLog should be used with Fatal() or Panic()
-        // infoLog should not be used with Fatal() or Panic()
+        // errorLog for more important errors returned.
+        // infoLog for everything else.
         infoLog := log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime)
         errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
@@ -83,6 +89,8 @@ func main() {
                 DB: db,
                 infoLog: infoLog,
                 errorLog: errorLog,
+                source: &data.Source{InfoLog: infoLog, ErrorLog: errorLog},
+                info: &data.Info{InfoLog: infoLog, ErrorLog: errorLog},
         }
 
         // default parameters to the router.
