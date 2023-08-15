@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Regex for sanity checking the format of email adresses.
 var (
 	EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
@@ -49,6 +50,7 @@ func NotBlank(value string) bool {
         return strings.TrimSpace(value) != ""
 }
 
-func Matches(value string, rx *regexp.regexp) bool {
+// Matches() return true if a string value matches a specific regex pattern
+func Matches(value string, rx *regexp.Regexp) bool {
         return rx.MatchString(value)
 }
