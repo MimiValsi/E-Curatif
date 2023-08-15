@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -17,6 +18,9 @@ type Source struct {
         SID int `json:"-"`
 
         Created time.Time `json:"-"`
+
+        InfoLog *log.Logger `json:"-"`
+        ErrorLog *log.Logger `json:"-"`
 }
 
 // Needed for Menu graph
@@ -43,6 +47,7 @@ SELECT s.id
 
         rows, err := conn.Query(ctx, query)
         if err != nil {
+                src.ErrorLog.Println("Could not fetch data!")
                 return nil, err
         }
         defer rows.Close()
