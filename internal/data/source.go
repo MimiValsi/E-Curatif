@@ -117,7 +117,7 @@ SELECT s.id,
         return sources, nil
 }
 
-func (src *Source) Data(id int, conn pgxpool.Conn) (*Source, error) {
+func (src *Source) Data(id int, conn *pgxpool.Conn) (*Source, error) {
         ctx := context.Background()
 
         query := `
