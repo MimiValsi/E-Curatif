@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+        "html/template"
 
         "e-curatif/internal/data"
 
@@ -48,6 +49,9 @@ type application struct {
         // Connexion to data structs.
         source *data.Source
         info *data.Info
+
+        // Passing templateCache with application so it can be used easely.
+        templateCache map[string]*template.Template
 }
 
 // App version will be with github
@@ -84,6 +88,12 @@ func main() {
         }
         defer db.Close()
 
+        // Initialize template cache before starting application.
+        templateCache, err := newTemplateCache()
+        if err != nil {
+                errorLog.Fatal(err)
+        }
+
         // application struct instance containing connections to other packages.
         app := &application{
                 DB: db,
@@ -91,6 +101,7 @@ func main() {
                 errorLog: errorLog,
                 source: &data.Source{InfoLog: infoLog, ErrorLog: errorLog},
                 info: &data.Info{InfoLog: infoLog, ErrorLog: errorLog},
+                templateCache: templateCache,
         }
 
         // default parameters to the router.
