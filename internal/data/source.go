@@ -144,7 +144,7 @@ SELECT id, name, created
 
 // Make connexion and attempt to insert Source data to DB
 // If failed then return 0 as value.
-func (src *Source) Insert(name string, conn *pgx.Conn) (int, error) {
+func (src *Source) Insert(name string, conn *pgxpool.Conn) (int, error) {
         ctx := context.Background()
 
         query := `
