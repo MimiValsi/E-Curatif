@@ -75,7 +75,8 @@ SELECT i.material,
         return infos, nil
 } 
 
-func (i *Info) Insert(id int, conn pgxpool.Conn) (int, error) {
+// Send data to DB 
+func (i *Info) Insert(id int, conn *pgxpool.Conn) (int, error) {
         ctx := context.Background()
 
         query := `
@@ -93,6 +94,7 @@ VALUES ($1,  $2,  $3,  $4,
         args := []any{id, i.Agent, i.Material, i.Detail, i.Event, i.Priority,
                       i.Oups, i.Ameps, i.Brips, i.Rte, i.Ais, i.Estimate,
                       i.Target, i.Status, i.Doneby, time.Now().UTC()}
+
         err := conn.QueryRow(ctx, query, args...).Scan(&i.ID)
         if err != nil {
                 i.InfoLog.Println("Could not insert info data!")
