@@ -17,6 +17,30 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// On commence par vérifier si le fichier fini par .csv
+// si vrai, alors on démarre EncodingCSV()
+//
+// Exemple:
+
+// file.csv
+// file.csv: text/csv; charset=iso-8859-1
+//                            ^
+//
+// D'abord on lance la commande avec Output() afin de choper le string
+// puis on la sépare avec "="
+//
+// On obtient:
+// str[0] = file.csv: text/csv; charset
+// str[1] = iso-8859-1
+//
+// Copie str[1] en majuscule dans une variable tmp
+// Comme on ne sait pas quelle encodage le fichier peut avoir
+// on le vérifie
+// Si ce n'est pas en UTF-8, on change
+
+// 2 structs sont créées afin de séparer chaque DB
+// pour une meilleure lisibilité
+
 type CSV struct {
         Info struct {
                 ID       int
@@ -70,8 +94,6 @@ func (c *CSV) encoding(s string) {
 
 	tmp2 := strings.ToUpper(str[1])
 
-	// Vérif si encodage est en UTF-8\n
-	// si faux, on lance la commande de changement
 	if tmp2 != "UTF-8\n" {
 		cmd := exec.Command("iconv", "-f", tmp2,
 			"-t", "UTF-8", s, "-o", s)
