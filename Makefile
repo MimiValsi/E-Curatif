@@ -1,21 +1,43 @@
-FILE_PATH = $$GOPATH/bin/migrate
+include .envrc
 
-.PHONY: help
-help:
+# ==================== #
+# INTRODUCTION
+# ==================== #
+.PHONY: intro
+intro:
 	@echo "Welcome to E-Curatif!"
 	@echo
-	@echo "First time usage:"
-	@echo "$$ make go-migrate"
-	@echo "It will check if migrate file exists. If not, then it will be downloaded."
-	@echo "It will be needed to trace PostgreSQL migrations."
 
-# Check if go-migrate exists
-.PHONY: go-migrate
-go-migrate:
-	@if [ -f $(FILE_PATH) ]; then \
-		echo "migrate file exists"; \
-		else \
-		echo "nok"; \
-		curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz ; \
-		mv migrate.linux-amd64 $(FILE_PATH) ; \
-		fi
+# ==================== # 
+# HELPERS
+# ==================== # 
+
+## help: print this message
+.PHONY: help
+help:
+	@echo 'Usage:'
+	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
+
+# ==================== # 
+# DEVELOPMENT
+# ==================== # 
+
+## db/psql: connect to the database using psql
+.PHONY: db/psql
+db/psql:
+	@psql ${ECURATIF_DB_DSN}
+
+## run: run e-curatif/cmd app (Dev only)
+.PHONY: run
+# Only for test
+run:
+	@go run ./cmd/ecuratif/ -db-dsn=${ECURATIF_DB_DSN}
+
+# ==================== # 
+# PRODUCTION
+# ==================== # 
+
+## build: build the program. Use it only for prod!
+.PHONY: build
+build:
+	@go build -o launch ./cmd/e-curatif/ -db-dsn=${ECURATIF_DB_DSN}
