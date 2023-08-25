@@ -25,13 +25,13 @@ help:
 ## db/psql: connect to the database using psql
 .PHONY: db/psql
 db/psql:
-	@psql ${ECURATIF_DB_DSN}
+	@psql $(ECURATIF_DB_DSN)
 
 ## run: run e-curatif/cmd app (Dev only)
 .PHONY: run
 # Only for test
 run:
-	@go run ./cmd/ecuratif/ -db-dsn=${ECURATIF_DB_DSN}
+	@go run ./cmd/ecuratif/ -db-dsn=$(ECURATIF_DB_DSN)
 
 # ==================== # 
 # PRODUCTION
@@ -40,4 +40,4 @@ run:
 ## build: build the program. Use it only for prod!
 .PHONY: build
 build:
-	@go build -o launch ./cmd/e-curatif/ -db-dsn=${ECURATIF_DB_DSN}
+	@go build -o launch ./cmd/e-curatif/ -db-dsn=$(ECURATIF_DB_DSN)

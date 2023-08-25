@@ -42,50 +42,50 @@ import (
 // pour une meilleure lisibilité
 
 type CSV struct {
-        Info struct {
-                ID       int
-                Priority int
-                SourceID int
-                Agent    string
-                Event    string
-                Created  string // Cast to date with PSQL
-                Material string
-                Pilot    string
-                Detail   string
-                Target   string
-                DayDone  string
-                Estimate string
-                Oups     string
-                Brips    string
-                Ameps    string
-                Status   string
-        }
-        Source struct  {
-                ID   int
-                Name string
+	Info struct {
+		ID       int
+		Priority int
+		SourceID int
+		Agent    string
+		Event    string
+		Created  string // Cast to date with PSQL
+		Material string
+		Pilot    string
+		Detail   string
+		Target   string
+		DayDone  string
+		Estimate string
+		Oups     string
+		Brips    string
+		Ameps    string
+		Status   string
+	}
+	Source struct {
+		ID   int
+		Name string
 
-                Created time.Time
-        }
-	DB       *pgxpool.Pool
+		Created time.Time
+	}
+	DB *pgxpool.Pool
 
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }
 
 func (c *CSV) Verify(s string) {
-        file := filepath.Ext(s)
+	file := filepath.Ext(s)
 
-        if file != ".csv" {
-                c.ErrorLog.Println("Wrong type of file")
-        } else {
-                c.encoding(s)
-        }
+	if file != ".csv" {
+		c.ErrorLog.Println("Wrong type of file")
+	} else {
+		c.encoding(s)
+	}
 }
 
 func (c *CSV) encoding(s string) {
 	cmd, err := exec.Command("file", "-i", s).Output()
 	if err != nil {
-	        c.ErrorLog.Println(err)
+		c.ErrorLog.Println(err)
 	}
 
 	str := []string{}
@@ -116,7 +116,7 @@ func (c *CSV) data(s string) {
 		c.ErrorLog.Println(err)
 	}
 
-        // lines[0][0] == Source name
+	// lines[0][0] == Source name
 	source, err := c.sourceNb(lines[0][0])
 	if err != nil {
 		c.ErrorLog.Println(err)
@@ -131,14 +131,14 @@ func (c *CSV) data(s string) {
 		c.Info.Material = line[j+3]
 		c.Info.Detail = line[j+4]
 		c.Info.Target = line[j+5]
-                c.Info.DayDone = line[j+8]
+		c.Info.DayDone = line[j+8]
 		c.Info.Priority, _ = strconv.Atoi(line[j+9])
 		c.Info.Estimate = line[j+10]
 		c.Info.Oups = line[j+11]
 		c.Info.Brips = line[j+12]
 		c.Info.Ameps = line[j+13]
 		c.Info.SourceID = source
-                
+
 		if c.Info.Status == "" && c.Info.DayDone == "" &&
 			c.Info.Target == "" {
 			c.Info.Status = "en attente"
@@ -147,14 +147,14 @@ func (c *CSV) data(s string) {
 		} else if c.Info.Target != "" && c.Info.DayDone != "" {
 			c.Info.Status = "résolu"
 		}
-        }
+	}
 
-        c.insert()
+	c.insert()
 }
 
 func (c *CSV) insert() {
-        ctx := context.Background()
-        query := `
+	ctx := context.Background()
+	query := `
 INSERT INTO info
   (source_id, agent, event, material, pilote, detail, target, day_done,
     priority, estimate, oups, brips, ameps, created, status)
@@ -163,17 +163,17 @@ INSERT INTO info
       (to_date($14, 'DD/MM/YYYY')), %15)
 `
 
-        ci := c.Info
-        args := []any{ci.SourceID, ci.Agent, ci.Event, ci.Material, ci.Pilot,
-                ci.Detail, ci.Target, ci.DayDone, ci.Priority, ci.Estimate, 
-                ci.Oups, ci.Brips, ci.Ameps, ci.Created, ci.Status}
+	ci := c.Info
+	args := []any{ci.SourceID, ci.Agent, ci.Event, ci.Material, ci.Pilot,
+		ci.Detail, ci.Target, ci.DayDone, ci.Priority, ci.Estimate,
+		ci.Oups, ci.Brips, ci.Ameps, ci.Created, ci.Status}
 
-        _, err := c.DB.Exec(ctx, query, args...)
-        if err != nil {
-                c.ErrorLog.Println(err)
-        }
+	_, err := c.DB.Exec(ctx, query, args...)
+	if err != nil {
+		c.ErrorLog.Println(err)
+	}
 
-        c.InfoLog.Println("data successfuly sent")
+	c.InfoLog.Println("data successfuly sent")
 }
 
 func (c *CSV) sourceNb(s string) (int, error) {
